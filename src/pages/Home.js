@@ -1,11 +1,9 @@
 import React, { useEffect } from "react";
 import axios from "axios";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function Home() {
   const [data, setData] = React.useState(null);
-
-  const { id } = useParams();
 
   useEffect(() => {
     loadStudents();
