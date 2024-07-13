@@ -1,22 +1,54 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import {
+  Container,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Button,
+  Paper,
+} from "@mui/material";
+import { styled } from "@mui/system";
+
+// Styling for TableContainer with blurred shadow
+const StyledTableContainer = styled(TableContainer)({
+  backdropFilter: "blur(10px)",
+  borderRadius: "15px",
+  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+});
+
+// Styled TableCell for TableHead to make text bold
+const StyledTableHeaderCell = styled(TableCell)({
+  fontWeight: "bold",
+});
 
 export default function Home() {
-  const [data, setData] = React.useState(null);
+  const [data, setData] = useState(null);
 
   useEffect(() => {
     loadStudents();
   }, []);
 
   const loadStudents = async () => {
-    const result = await axios.get("http://localhost:8080/api/v1/students");
-    setData(result.data);
+    try {
+      const result = await axios.get("http://localhost:8080/api/v1/students");
+      setData(result.data);
+    } catch (error) {
+      console.error("Error fetching students:", error);
+    }
   };
 
   const deleteStudent = async (id) => {
-    await axios.delete(`http://localhost:8080/api/v1/students/${id}`);
-    loadStudents();
+    try {
+      await axios.delete(`http://localhost:8080/api/v1/students/${id}`);
+      loadStudents();
+    } catch (error) {
+      console.error("Error deleting student:", error);
+    }
   };
 
   const calculateAge = (birthDate) => {
@@ -34,49 +66,62 @@ export default function Home() {
   };
 
   return (
-    <div className="container">
-      <div className="py-4">
-        <table class="table border shadow">
-          <thead>
-            <tr>
-              <th scope="col">NIM</th>
-              <th scope="col">Full Name</th>
-              <th scope="col">Age</th>
-              <th scope="col">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data &&
-              data.map((student, index) => (
-                <tr>
-                  <td>{student.id}</td>
-                  <td>{`${student.firstName} ${student.lastName}`}</td>
-                  <td>{calculateAge(student.birthOfDate)}</td>
-                  <td>
-                    <Link
-                      className="btn btn-primary mx-2"
-                      to={`/viewStudent/${student.id}`}
-                    >
-                      View
-                    </Link>
-                    <Link
-                      className="btn btn-outline-primary mx-2"
-                      to={`/editStudent/${student.id}`}
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      className="btn btn-danger mx-2"
-                      onClick={() => deleteStudent(student.id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
+    <Container>
+      <div style={{ marginTop: "2rem" }}>
+        <StyledTableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <StyledTableHeaderCell>NIM</StyledTableHeaderCell>
+                <StyledTableHeaderCell>Full Name</StyledTableHeaderCell>
+                <StyledTableHeaderCell>Age</StyledTableHeaderCell>
+                <StyledTableHeaderCell>Action</StyledTableHeaderCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data &&
+                data.map((student, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{student.id}</TableCell>
+                    <TableCell>{`${student.firstName} ${student.lastName}`}</TableCell>
+                    <TableCell>{calculateAge(student.birthOfDate)}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        component={Link}
+                        to={`/viewStudent/${student.id}`}
+                        size="small"
+                        style={{ marginRight: "0.5rem", borderRadius: "20px" }}
+                      >
+                        View
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        component={Link}
+                        to={`/editStudent/${student.id}`}
+                        size="small"
+                        style={{ marginRight: "0.5rem", borderRadius: "20px" }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => deleteStudent(student.id)}
+                        size="small"
+                        style={{ borderRadius: "20px" }}
+                      >
+                        Delete
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </StyledTableContainer>
       </div>
-    </div>
+    </Container>
   );
 }

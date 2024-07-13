@@ -1,10 +1,17 @@
 import axios from "axios";
 import React, { useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Grid,
+  Paper,
+} from "@mui/material";
 
 export default function EditStudent() {
-  let navigate = useNavigate();
-
+  const navigate = useNavigate();
   const { id } = useParams();
 
   const [student, setStudent] = React.useState({
@@ -15,88 +22,107 @@ export default function EditStudent() {
 
   const { firstName, lastName, birthOfDate } = student;
 
-  const onInputChange = (e) => {
-    setStudent({ ...student, [e.target.name]: e.target.value });
-  };
-
   useEffect(() => {
     loadStudent();
   }, []);
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    await axios.put(`http://localhost:8080/api/v1/students/${id}`, student);
-    navigate("/");
+  const loadStudent = async () => {
+    try {
+      const result = await axios.get(
+        `http://localhost:8080/api/v1/students/${id}`
+      );
+      setStudent(result.data);
+    } catch (error) {
+      console.error("Error loading student:", error);
+    }
   };
 
-  const loadStudent = async () => {
-    const result = await axios.get(
-      `http://localhost:8080/api/v1/students/${id}`
-    );
-    setStudent(result.data);
+  const handleInputChange = (e) => {
+    setStudent({ ...student, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.put(`http://localhost:8080/api/v1/students/${id}`, student);
+      navigate("/");
+    } catch (error) {
+      console.error("Error updating student:", error);
+    }
   };
 
   return (
-    <div className="container">
-      <div className="row justify-content-center">
-        <div className="col-md-6 border rounded p-4 mt-2 shadow-lg">
-          <h2 className="text-center mb-4">Edit Student</h2>
-          <form onSubmit={(e) => onSubmit(e)}>
-            <div className="mb-3">
-              <label htmlFor="firstName" className="form-label">
-                First Name
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Enter your first name"
-                name="firstName"
+    <Container component="main" maxWidth="xs" sx={{ marginTop: "4rem" }}>
+      <Paper elevation={3} style={{ padding: "20px", borderRadius: "10px" }}>
+        <Typography variant="h5" align="center" gutterBottom>
+          Edit Student
+        </Typography>
+        <form onSubmit={handleSubmit}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                variant="outlined"
+                fullWidth
                 id="firstName"
+                label="First Name"
+                name="firstName"
                 value={firstName}
-                onChange={(e) => onInputChange(e)}
+                onChange={handleInputChange}
                 required
               />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="lastName" className="form-label">
-                Last Name
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Enter your last name"
-                name="lastName"
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                variant="outlined"
+                fullWidth
                 id="lastName"
+                label="Last Name"
+                name="lastName"
                 value={lastName}
-                onChange={(e) => onInputChange(e)}
+                onChange={handleInputChange}
               />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="birthOfDate" className="form-label">
-                Date of Birth
-              </label>
-              <input
-                type="date"
-                className="form-control"
-                name="birthOfDate"
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                variant="outlined"
+                fullWidth
                 id="birthOfDate"
+                label="Date of Birth"
+                name="birthOfDate"
+                type="date"
                 value={birthOfDate}
-                onChange={(e) => onInputChange(e)}
+                onChange={handleInputChange}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                InputProps={{
+                  style: { marginTop: "8px" },
+                }}
                 required
               />
-            </div>
-            <button
-              type="submit"
-              className="btn btn-outline-primary w-100 mt-3"
-            >
-              Submit
-            </button>
-            <Link className="btn btn-outline-danger w-100 mt-3" to="/">
-              Cancel
-            </Link>
-          </form>
-        </div>
-      </div>
-    </div>
+            </Grid>
+          </Grid>
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 1, borderRadius: "20px" }}
+            color="primary"
+          >
+            Submit
+          </Button>
+          <Button
+            component={Link}
+            to="/"
+            fullWidth
+            variant="outlined"
+            sx={{ mt: 1, mb: 2, borderRadius: "20px" }}
+            color="error"
+          >
+            Cancel
+          </Button>
+        </form>
+      </Paper>
+    </Container>
   );
 }

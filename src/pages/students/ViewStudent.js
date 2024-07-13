@@ -1,26 +1,41 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
+import {
+  Container,
+  Card,
+  CardHeader,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Button,
+} from "@mui/material";
 
 export default function ViewStudent() {
   const { id } = useParams();
 
-  const [student, setStudent] = React.useState({
-    nim: "",
+  const [student, setStudent] = useState({
+    id: "",
     firstName: "",
     lastName: "",
     birthOfDate: "",
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     loadStudent();
-  });
+  }, []);
 
   const loadStudent = async () => {
-    const result = await axios.get(
-      `http://localhost:8080/api/v1/students/${id}`
-    );
-    setStudent(result.data);
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/v1/students/${id}`
+      );
+      setStudent(response.data);
+    } catch (error) {
+      console.error("Error loading student:", error);
+    }
   };
 
   const calculateAge = (birthDate) => {
@@ -38,36 +53,53 @@ export default function ViewStudent() {
   };
 
   return (
-    <div className="container">
-      <div className="row justify-content-center">
-        <div className="col-md-6 border rounded p-4 mt-2 shadow-lg">
+    <Container style={{ marginTop: "2rem" }}>
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <Card
+          className="border rounded p-4 shadow-lg"
+          style={{ maxWidth: "600px", width: "100%", margin: "0 auto" }}
+        >
           <h2 className="text-center mb-4">Student Details</h2>
 
-          <div className="card">
-            <div className="card-header">
-              Details of Student :
-              <ul className="list-group list-group-flush">
-                <li className="list-group-item">
-                  <b>NIM : </b>
-                  {student.id}
-                </li>
-                <li className="list-group-item">
-                  <b>Full Name : </b>
-                  {student.firstName} {student.lastName}
-                </li>
-                <li className="list-group-item">
-                  <b>Age : </b>
-                  {calculateAge(student.birthOfDate)}
-                </li>
-              </ul>
-            </div>
-          </div>
+          <CardHeader title="Details of Student:" />
 
-          <Link className="btn btn-primary my-2" to={"/"}>
+          <TableContainer>
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell>
+                    <b>NIM:</b>
+                  </TableCell>
+                  <TableCell>{student.id}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>
+                    <b>Full Name:</b>
+                  </TableCell>
+                  <TableCell>{`${student.firstName} ${student.lastName}`}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>
+                    <b>Age:</b>
+                  </TableCell>
+                  <TableCell>{calculateAge(student.birthOfDate)}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <Button
+            component={Link}
+            to="/"
+            variant="contained"
+            color="primary"
+            fullWidth
+            style={{ marginTop: "1rem", borderRadius: "20px" }}
+          >
             Back to Home
-          </Link>
-        </div>
+          </Button>
+        </Card>
       </div>
-    </div>
+    </Container>
   );
 }
